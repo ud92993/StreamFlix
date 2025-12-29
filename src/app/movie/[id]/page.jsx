@@ -40,7 +40,7 @@ export default function MoviePage() {
           href="/"
           className="rounded-lg bg-netflix-red px-6 py-3 font-semibold text-white hover:bg-netflix-red/90"
         >
-          Retour à l'accueil
+          {"Retour à l'accueil"}
         </Link>
       </div>
     );
@@ -88,7 +88,7 @@ export default function MoviePage() {
             
             <div className="mt-4 rounded-lg border border-amber-900/30 bg-amber-950/20 p-4">
               <p className="text-sm text-amber-300">
-                Si le lecteur ne s'affiche pas, désactivez votre bloqueur de publicités.
+                {"Si le lecteur ne s'affiche pas, désactivez votre bloqueur de publicités."}
               </p>
             </div>
           </div>
