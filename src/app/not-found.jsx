@@ -7,13 +7,13 @@ export default function NotFound() {
         <h1 className="mb-4 text-9xl font-bold text-netflix-red">404</h1>
         <h2 className="mb-4 text-3xl font-bold text-white">Page non trouvée</h2>
         <p className="mb-8 text-netflix-lightGray">
-          Désolé, la page que vous recherchez n'existe pas.
+          Désolé, la page que vous recherchez n&apos;existe pas.
         </p>
         <Link
           href="/"
           className="inline-block rounded-md bg-netflix-red px-8 py-3 font-semibold text-white transition-colors hover:bg-netflix-red/90"
         >
-          Retour à l'accueil
+          Retour à l&apos;accueil
         </Link>
       </div>
     </div>
