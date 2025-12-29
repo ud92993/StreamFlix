@@ -154,7 +154,7 @@ export default function AdminForm({ onSuccess }) {
       {/* URL de l'affiche */}
       <div>
         <label className="mb-2 block text-sm font-medium text-white">
-          URL de l'affiche *
+          URL de l&apos;affiche *
         </label>
         <input
           type="url"
