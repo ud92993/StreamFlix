@@ -53,7 +53,7 @@ export default function AdminLoginPage() {
           <Link href="/">
             <h1 className="text-5xl font-bold text-netflix-red">StreamFlix</h1>
           </Link>
-          <p className="mt-2 text-netflix-lightGray">Espace d'administration</p>
+          <p className="mt-2 text-netflix-lightGray">Espace d&apos;administration</p>
         </div>
 
         {/* Formulaire de connexion */}
@@ -115,7 +115,7 @@ export default function AdminLoginPage() {
               href="/"
               className="text-sm text-netflix-lightGray hover:text-white"
             >
-              ← Retour à l'accueil
+              ← Retour à l&apos;accueil
             </Link>
           </div>
         </div>
