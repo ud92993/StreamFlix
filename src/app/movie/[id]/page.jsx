@@ -68,7 +68,7 @@ export default function MoviePage() {
             </div>
             <div className="mt-4 rounded bg-netflix-gray p-4">
               <p className="text-sm text-netflix-lightGray">
-                ⚠️ Si le lecteur ne s'affiche pas, désactivez votre bloqueur de pub.
+                ⚠️ Si le lecteur ne s&apos;affiche pas, désactivez votre bloqueur de pub.
               </p>
             </div>
           </div>
