@@ -41,7 +41,7 @@ export default function MoviePage() {
           </svg>
         </div>
         <h1 className="mb-3 text-3xl font-bold text-white">Film non trouvé</h1>
-        <p className="mb-8 text-purple-200">Ce film n'existe pas ou a été supprimé</p>
+        <p className="mb-8 text-purple-200">Ce film n&apos;existe pas ou a été supprimé</p>
         <Link
           href="/"
           className="flex items-center gap-2 rounded-full bg-white px-8 py-4 font-bold text-purple-900 transition-all hover:scale-105"
@@ -49,7 +49,7 @@ export default function MoviePage() {
           <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
-          Retour à l'accueil
+          Retour à l&apos;accueil
         </Link>
       </div>
     );
