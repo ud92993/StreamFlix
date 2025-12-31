@@ -5,40 +5,11 @@ import Link from 'next/link';
 
 export default function HomePage() {
   const [movies, setMovies] = useState([]);
-  const [filteredMovies, setFilteredMovies] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('all');
+  const [activeNav, setActiveNav] = useState('home');
+  const [showSearch, setShowSearch] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  const CATEGORIES = [
-    { id: 'all', name: 'Tous', icon: 'M4 6h16M4 12h16M4 18h16' },
-    { id: 'movies', name: 'Films', icon: 'M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z' },
-    { id: 'tvshows', name: 'Séries TV', icon: 'M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z' },
-  ];
-
-  const GENRES = [
-    'Action',
-    'Aventure', 
-    'Animation',
-    'Comédie',
-    'Crime',
-    'Documentaire',
-    'Drame',
-    'Familial',
-    'Fantastique',
-    'Histoire',
-    'Horreur',
-    'Musique',
-    'Mystère',
-    'Romance',
-    'Science-Fiction',
-    'Thriller',
-    'Guerre',
-    'Western'
-  ];
-
-  const [selectedGenre, setSelectedGenre] = useState('all');
 
   useEffect(() => {
     fetchMovies();
@@ -51,7 +22,6 @@ export default function HomePage() {
       
       if (data.success) {
         setMovies(data.data);
-        setFilteredMovies(data.data);
       }
     } catch (error) {
       console.error('Erreur:', error);
@@ -60,232 +30,234 @@ export default function HomePage() {
     }
   };
 
-  useEffect(() => {
-    let filtered = movies;
-
-    if (selectedGenre !== 'all') {
-      filtered = filtered.filter(movie => {
-        if (Array.isArray(movie.genres)) {
-          return movie.genres.includes(selectedGenre);
-        }
-        return movie.genre === selectedGenre;
-      });
-    }
-
-    if (searchTerm) {
-      filtered = filtered.filter(movie =>
-        movie.title.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
-    setFilteredMovies(filtered);
-  }, [searchTerm, selectedGenre, movies]);
-
-  // Grouper par genre
-  const moviesByGenre = {};
-  filteredMovies.forEach(movie => {
-    const genres = Array.isArray(movie.genres) ? movie.genres : [movie.genre];
-    genres.forEach(genre => {
-      if (genre) {
-        if (!moviesByGenre[genre]) {
-          moviesByGenre[genre] = [];
-        }
-        moviesByGenre[genre].push(movie);
-      }
-    });
-  });
+  const filteredMovies = searchTerm 
+    ? movies.filter(m => m.title.toLowerCase().includes(searchTerm.toLowerCase()))
+    : movies;
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#0a0a0a]">
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-[#1a0b2e] via-[#2d1b4e] to-[#1a0b2e]">
         <div className="text-center">
-          <div className="mb-4 h-16 w-16 animate-spin rounded-full border-4 border-gray-700 border-t-[#E50914]"></div>
-          <p className="text-gray-400">Chargement...</p>
+          <div className="mb-4 h-16 w-16 animate-spin rounded-full border-4 border-purple-500/30 border-t-[#E50914]"></div>
+          <p className="text-purple-200">Loading...</p>
         </div>
       </div>
     );
   }
 
   const featuredMovie = filteredMovies[0];
+  const recommendedMovies = filteredMovies.slice(0, 12);
 
   return (
-    <div className="flex min-h-screen bg-[#0a0a0a]">
-      {/* Sidebar */}
-      <aside className={`fixed inset-y-0 left-0 z-50 w-64 transform bg-[#141414] transition-transform duration-300 lg:relative lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-        <div className="flex h-full flex-col">
-          {/* Logo */}
-          <div className="flex items-center gap-3 border-b border-gray-800 px-6 py-6">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-[#E50914] to-[#b20710]">
-              <svg className="h-6 w-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M2 6a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z" />
-              </svg>
-            </div>
-            <h1 className="text-xl font-bold text-white">StreamFlix</h1>
-          </div>
+    <div className="flex min-h-screen bg-gradient-to-br from-[#1a0b2e] via-[#2d1b4e] to-[#1a0b2e]">
+      {/* Left Sidebar - Slim & Functional */}
+      <aside className="fixed left-0 top-0 z-50 hidden h-full w-20 flex-col items-center gap-8 border-r border-white/5 bg-gradient-to-b from-purple-900/20 to-transparent py-8 backdrop-blur-xl lg:flex">
+        {/* Logo */}
+        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-[#E50914] to-[#b20710] shadow-lg shadow-[#E50914]/30">
+          <svg className="h-7 w-7 text-white" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M2 6a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z" />
+          </svg>
+        </div>
+
+        {/* Navigation Icons */}
+        <nav className="flex flex-col items-center gap-6">
+          {/* Home */}
+          <button
+            onClick={() => setActiveNav('home')}
+            className={`group relative flex h-12 w-12 items-center justify-center rounded-xl transition-all ${
+              activeNav === 'home'
+                ? 'bg-purple-600/40 shadow-lg shadow-purple-500/30'
+                : 'hover:bg-white/10'
+            }`}
+          >
+            <svg className={`h-6 w-6 transition-all ${activeNav === 'home' ? 'text-white drop-shadow-[0_0_8px_rgba(139,92,246,0.8)]' : 'text-white/70'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            </svg>
+          </button>
 
           {/* Search */}
-          <div className="border-b border-gray-800 p-4">
-            <div className="relative">
+          <button
+            onClick={() => {
+              setActiveNav('search');
+              setShowSearch(!showSearch);
+            }}
+            className={`group relative flex h-12 w-12 items-center justify-center rounded-xl transition-all ${
+              activeNav === 'search'
+                ? 'bg-purple-600/40 shadow-lg shadow-purple-500/30'
+                : 'hover:bg-white/10'
+            }`}
+          >
+            <svg className={`h-6 w-6 transition-all ${activeNav === 'search' ? 'text-white drop-shadow-[0_0_8px_rgba(139,92,246,0.8)]' : 'text-white/70'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </button>
+
+          {/* Bookmark / My List */}
+          <button
+            onClick={() => setActiveNav('bookmark')}
+            className={`group relative flex h-12 w-12 items-center justify-center rounded-xl transition-all ${
+              activeNav === 'bookmark'
+                ? 'bg-purple-600/40 shadow-lg shadow-purple-500/30'
+                : 'hover:bg-white/10'
+            }`}
+          >
+            <svg className={`h-6 w-6 transition-all ${activeNav === 'bookmark' ? 'text-white drop-shadow-[0_0_8px_rgba(139,92,246,0.8)]' : 'text-white/70'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+            </svg>
+          </button>
+
+          {/* Categories */}
+          <button
+            onClick={() => setActiveNav('categories')}
+            className={`group relative flex h-12 w-12 items-center justify-center rounded-xl transition-all ${
+              activeNav === 'categories'
+                ? 'bg-purple-600/40 shadow-lg shadow-purple-500/30'
+                : 'hover:bg-white/10'
+            }`}
+          >
+            <svg className={`h-6 w-6 transition-all ${activeNav === 'categories' ? 'text-white drop-shadow-[0_0_8px_rgba(139,92,246,0.8)]' : 'text-white/70'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+            </svg>
+          </button>
+        </nav>
+
+        {/* Admin en bas */}
+        <div className="mt-auto">
+          <Link
+            href="/admin/login"
+            className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/5 transition-all hover:bg-white/10"
+          >
+            <svg className="h-6 w-6 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+          </Link>
+        </div>
+      </aside>
+
+      {/* Main content */}
+      <div className="flex-1 lg:ml-20">
+        {/* Top Navigation - Pills Only */}
+        <div className="relative z-40 px-12 pt-8">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setActiveTab('all')}
+              className={`rounded-full px-6 py-3 text-sm font-bold transition-all ${
+                activeTab === 'all'
+                  ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/40'
+                  : 'bg-white/10 text-white/70 backdrop-blur-xl hover:bg-white/20 hover:text-white'
+              }`}
+            >
+              All
+            </button>
+            <button
+              onClick={() => setActiveTab('movies')}
+              className={`rounded-full px-6 py-3 text-sm font-bold transition-all ${
+                activeTab === 'movies'
+                  ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/40'
+                  : 'bg-white/10 text-white/70 backdrop-blur-xl hover:bg-white/20 hover:text-white'
+              }`}
+            >
+              Movies
+            </button>
+            <button
+              onClick={() => setActiveTab('tvshows')}
+              className={`rounded-full px-6 py-3 text-sm font-bold transition-all ${
+                activeTab === 'tvshows'
+                  ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/40'
+                  : 'bg-white/10 text-white/70 backdrop-blur-xl hover:bg-white/20 hover:text-white'
+              }`}
+            >
+              TV Shows
+            </button>
+            <button
+              onClick={() => setActiveTab('livetv')}
+              className={`rounded-full px-6 py-3 text-sm font-bold transition-all ${
+                activeTab === 'livetv'
+                  ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/40'
+                  : 'bg-white/10 text-white/70 backdrop-blur-xl hover:bg-white/20 hover:text-white'
+              }`}
+            >
+              Live TV
+            </button>
+          </div>
+        </div>
+
+        {/* Search Bar (conditional) */}
+        {showSearch && (
+          <div className="px-12 pt-6">
+            <div className="relative max-w-xl">
               <input
                 type="text"
-                placeholder="Rechercher..."
+                placeholder="Search movies..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full rounded-lg bg-[#1f1f1f] px-4 py-2.5 pl-10 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#E50914]"
+                className="w-full rounded-full border border-white/20 bg-white/10 px-6 py-3 pl-12 text-white placeholder-white/60 backdrop-blur-xl transition-all focus:bg-white/20 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+                autoFocus
               />
-              <svg className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-white/60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
             </div>
           </div>
+        )}
 
-          {/* Categories */}
-          <div className="border-b border-gray-800 p-4">
-            <div className="space-y-1">
-              {CATEGORIES.map((cat) => (
-                <button
-                  key={cat.id}
-                  onClick={() => {
-                    setSelectedCategory(cat.id);
-                    setSidebarOpen(false);
-                  }}
-                  className={`flex w-full items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium transition-all ${
-                    selectedCategory === cat.id
-                      ? 'bg-[#E50914] text-white shadow-lg shadow-[#E50914]/20'
-                      : 'text-gray-400 hover:bg-[#1f1f1f] hover:text-white'
-                  }`}
-                >
-                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={cat.icon} />
-                  </svg>
-                  {cat.name}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Genres */}
-          <nav className="flex-1 overflow-y-auto p-4">
-            <h3 className="mb-3 px-4 text-xs font-semibold uppercase tracking-wider text-gray-500">Genres</h3>
-            <div className="space-y-1">
-              <button
-                onClick={() => setSelectedGenre('all')}
-                className={`w-full rounded-lg px-4 py-2 text-left text-sm font-medium transition-all ${
-                  selectedGenre === 'all'
-                    ? 'bg-[#E50914] text-white'
-                    : 'text-gray-400 hover:bg-[#1f1f1f] hover:text-white'
-                }`}
-              >
-                Tous les genres
-              </button>
-              {GENRES.map((genre) => (
-                <button
-                  key={genre}
-                  onClick={() => setSelectedGenre(genre)}
-                  className={`w-full rounded-lg px-4 py-2 text-left text-sm font-medium transition-all ${
-                    selectedGenre === genre
-                      ? 'bg-[#E50914] text-white'
-                      : 'text-gray-400 hover:bg-[#1f1f1f] hover:text-white'
-                  }`}
-                >
-                  {genre}
-                </button>
-              ))}
-            </div>
-          </nav>
-
-          {/* Admin */}
-          <div className="border-t border-gray-800 p-4">
-            <Link
-              href="/admin/login"
-              className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#1f1f1f] px-4 py-2.5 text-sm font-medium text-white transition-all hover:bg-[#2a2a2a]"
-            >
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-              </svg>
-              Admin
-            </Link>
-          </div>
-        </div>
-      </aside>
-
-      {/* Overlay mobile */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-black/80 backdrop-blur-sm lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-
-      {/* Main content */}
-      <div className="flex-1 overflow-x-hidden">
-        {/* Header mobile */}
-        <header className="sticky top-0 z-30 flex items-center gap-4 border-b border-gray-800 bg-[#0a0a0a]/95 px-4 py-4 backdrop-blur-md lg:hidden">
-          <button
-            onClick={() => setSidebarOpen(true)}
-            className="text-white"
-          >
-            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
-          <h1 className="text-xl font-bold text-white">StreamFlix</h1>
-        </header>
-
-        {/* Hero section */}
+        {/* Hero Section - Cinematic Banner */}
         {featuredMovie && (
-          <div className="relative h-[500px] lg:h-[600px]">
+          <div className="relative mt-8 h-[600px] overflow-hidden">
             <div className="absolute inset-0">
               <img
                 src={featuredMovie.poster}
                 alt={featuredMovie.title}
                 className="h-full w-full object-cover"
               />
-              <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0a] via-[#0a0a0a]/90 to-transparent" />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent" />
+              {/* Fade to Purple */}
+              <div className="absolute inset-0 bg-gradient-to-r from-[#1a0b2e] via-[#1a0b2e]/90 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#1a0b2e] via-transparent to-transparent" />
             </div>
-            <div className="relative flex h-full items-end px-6 pb-16 lg:items-center lg:px-16 lg:pb-0">
+            
+            {/* Content Overlay */}
+            <div className="relative flex h-full items-center px-12 lg:px-20">
               <div className="max-w-2xl">
-                <div className="mb-4 inline-block rounded-full bg-[#E50914] px-4 py-1 text-xs font-bold uppercase tracking-wider text-white">
-                  À la une
-                </div>
-                <h2 className="mb-4 text-4xl font-bold text-white drop-shadow-2xl lg:text-6xl">
+                <h1 className="mb-6 text-6xl font-bold text-white drop-shadow-2xl lg:text-7xl">
                   {featuredMovie.title}
-                </h2>
-                <div className="mb-4 flex flex-wrap items-center gap-3 text-sm text-gray-300">
-                  <span className="flex items-center gap-1">
-                    <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                </h1>
+                
+                <div className="mb-6 flex flex-wrap items-center gap-4 text-sm font-semibold text-purple-100">
+                  <span className="flex items-center gap-2">
+                    <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
                     </svg>
                     {featuredMovie.year}
                   </span>
-                  <span>•</span>
-                  <span>{Array.isArray(featuredMovie.genres) ? featuredMovie.genres.join(', ') : featuredMovie.genre}</span>
                   {featuredMovie.duration && featuredMovie.duration !== 'N/A' && (
                     <>
                       <span>•</span>
                       <span>{featuredMovie.duration}</span>
                     </>
                   )}
+                  <span>•</span>
+                  <span className="rounded-md bg-[#E50914] px-2 py-1 font-bold">HD</span>
                 </div>
-                <p className="mb-6 line-clamp-3 text-gray-300 drop-shadow-lg">
+                
+                <p className="mb-8 line-clamp-3 text-lg leading-relaxed text-purple-50 drop-shadow-lg">
                   {featuredMovie.description}
                 </p>
-                <div className="flex flex-wrap gap-3">
+                
+                <div className="flex flex-wrap gap-4">
                   <Link
                     href={`/movie/${featuredMovie._id}`}
-                    className="group flex items-center gap-2 rounded-lg bg-[#E50914] px-8 py-3 font-bold text-white shadow-xl shadow-[#E50914]/30 transition-all hover:bg-[#b20710] hover:shadow-2xl hover:shadow-[#E50914]/40"
+                    className="group flex items-center gap-3 rounded-full bg-white px-8 py-4 font-bold text-purple-900 shadow-2xl shadow-white/30 transition-all hover:scale-105 hover:shadow-white/50"
                   >
-                    <svg className="h-5 w-5 transition-transform group-hover:scale-110" fill="currentColor" viewBox="0 0 20 20">
+                    <svg className="h-6 w-6 transition-transform group-hover:scale-110" fill="currentColor" viewBox="0 0 20 20">
                       <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
                     </svg>
-                    Regarder maintenant
+                    Play Now
                   </Link>
-                  <button className="flex items-center gap-2 rounded-lg bg-white/10 px-6 py-3 font-semibold text-white backdrop-blur-sm transition-all hover:bg-white/20">
-                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <button className="flex items-center gap-3 rounded-full border-2 border-white/40 bg-white/10 px-8 py-4 font-bold text-white backdrop-blur-xl transition-all hover:bg-white/20">
+                    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                     </svg>
-                    Ma liste
+                    My List
                   </button>
                 </div>
               </div>
@@ -293,93 +265,43 @@ export default function HomePage() {
           </div>
         )}
 
-        {/* Content sections */}
-        <div className="space-y-12 px-6 py-12 lg:px-16">
-          {selectedGenre === 'all' ? (
-            // Affichage par carrousels de genres
-            <>
-              {Object.entries(moviesByGenre).slice(0, 6).map(([genre, genreMovies]) => (
-                <div key={genre}>
-                  <div className="mb-6 flex items-center justify-between">
-                    <h3 className="text-2xl font-bold text-white">{genre}</h3>
-                    <button 
-                      onClick={() => setSelectedGenre(genre)}
-                      className="text-sm font-medium text-gray-400 transition-colors hover:text-[#E50914]"
-                    >
-                      Voir tout →
-                    </button>
-                  </div>
-                  <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
-                    {genreMovies.slice(0, 10).map(movie => (
-                      <Link key={movie._id} href={`/movie/${movie._id}`} className="group flex-shrink-0">
-                        <div className="w-48 overflow-hidden rounded-xl bg-[#1f1f1f] transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-[#E50914]/20">
-                          <div className="relative aspect-[2/3]">
-                            <img
-                              src={movie.poster}
-                              alt={movie.title}
-                              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-                              <div className="absolute bottom-0 left-0 right-0 p-4">
-                                <h4 className="mb-1 text-sm font-bold text-white line-clamp-2">
-                                  {movie.title}
-                                </h4>
-                                <span className="text-xs text-gray-300">{movie.year}</span>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </>
-          ) : (
-            // Affichage en grille pour un genre spécifique
-            <div>
-              <h3 className="mb-8 text-3xl font-bold text-white">
-                {selectedGenre}
-                <span className="ml-3 text-lg font-normal text-gray-400">
-                  ({filteredMovies.length} films)
-                </span>
-              </h3>
-              {filteredMovies.length > 0 ? (
-                <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-                  {filteredMovies.map(movie => (
-                    <Link key={movie._id} href={`/movie/${movie._id}`} className="group">
-                      <div className="overflow-hidden rounded-xl bg-[#1f1f1f] transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-[#E50914]/20">
-                        <div className="relative aspect-[2/3]">
-                          <img
-                            src={movie.poster}
-                            alt={movie.title}
-                            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-                            <div className="absolute bottom-0 left-0 right-0 p-3">
-                              <h4 className="mb-1 text-sm font-bold text-white line-clamp-2">
-                                {movie.title}
-                              </h4>
-                              <span className="text-xs text-gray-300">{movie.year}</span>
-                            </div>
-                          </div>
-                        </div>
+        {/* Recommended Row */}
+        <div className="px-12 py-16">
+          <h2 className="mb-8 text-3xl font-bold text-white">Recommended</h2>
+          <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+            {recommendedMovies.map((movie, index) => (
+              <Link key={movie._id} href={`/movie/${movie._id}`} className="group">
+                <div className={`relative overflow-hidden rounded-2xl transition-all duration-500 hover:scale-105 ${
+                  index === 3 
+                    ? 'ring-4 ring-yellow-400 shadow-2xl shadow-yellow-400/60' 
+                    : 'hover:shadow-2xl hover:shadow-purple-500/40'
+                }`}>
+                  <div className="relative aspect-[2/3]">
+                    <img
+                      src={movie.poster}
+                      alt={movie.title}
+                      className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                      <div className="absolute bottom-0 left-0 right-0 p-4">
+                        <h3 className="mb-1 text-sm font-bold text-white line-clamp-2">
+                          {movie.title}
+                        </h3>
+                        <p className="text-xs text-purple-200">{movie.year}</p>
                       </div>
-                    </Link>
-                  ))}
-                </div>
-              ) : (
-                <div className="flex min-h-[400px] items-center justify-center rounded-xl border border-gray-800 bg-[#141414]">
-                  <div className="text-center">
-                    <svg className="mx-auto mb-4 h-16 w-16 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" />
-                    </svg>
-                    <p className="text-gray-400">Aucun film trouvé</p>
+                    </div>
                   </div>
+                  {index === 3 && (
+                    <div className="absolute right-3 top-3 rounded-full bg-yellow-400 p-2 shadow-lg shadow-yellow-400/60">
+                      <svg className="h-4 w-4 text-purple-900" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-          )}
+              </Link>
+            ))}
+          </div>
         </div>
       </div>
     </div>
